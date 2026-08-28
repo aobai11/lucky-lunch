@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>午餐抽奖转盘 🍜</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ================= 登录 / 注册界面 ================= -->
+  <div id="auth-view" class="view">
+    <div class="auth-card">
+      <h1 class="auth-logo">🍜</h1>
+      <h2 id="auth-title">欢迎回来</h2>
+      <p id="auth-subtitle" class="auth-subtitle">登录后开启你的午餐抽奖之旅</p>
+
+      <form id="auth-form" autocomplete="off">
+        <label class="field">
+          <span>用户名</span>
+          <input type="text" id="username" placeholder="请输入用户名" maxlength="16" required>
+        </label>
+
+        <label class="field" id="password-field">
+          <span>密码</span>
+          <input type="password" id="password" placeholder="请输入密码" required>
+        </label>
+
+        <label class="field" id="confirm-field" style="display:none;">
+          <span>确认密码</span>
+          <input type="password" id="confirm" placeholder="请再次输入密码" required>
+        </label>
+
+        <div id="auth-error" class="auth-error" style="display:none;"></div>
+
+        <button type="submit" id="auth-submit" class="btn btn-primary btn-block">登 录</button>
+      </form>
+
+      <p class="auth-switch">
+        <span id="auth-switch-text">还没有账号？</span>
+        <a href="#" id="auth-toggle">立即注册</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ================= 抽奖主界面 ================= -->
+  <div id="lottery-view" class="view" style="display:none;">
+    <header class="topbar">
+      <div class="topbar-user">
+        <span class="avatar">👤</span>
+        <span>你好，<strong id="current-user"></strong></span>
+      </div>
+      <button id="logout-btn" class="btn btn-ghost">退出登录</button>
+    </header>
+
+    <main class="container">
+      <h1 class="page-title">🎡 午餐抽奖转盘</h1>
+      <p class="page-subtitle">今天吃什么，交给命运吧！</p>
+
+      <!-- 九宫格转盘 -->
+      <div id="wheel" class="wheel">
+        <div class="cell" data-index="0"><span class="cell-emoji">🌶️🍗</span><span class="cell-name">辣子鸡套餐</span></div>
+        <div class="cell" data-index="1"><span class="cell-emoji">🥔🍚</span><span class="cell-name">土豆肉片盖饭</span></div>
+        <div class="cell" data-index="2"><span class="cell-emoji">🥟</span><span class="cell-name">抄手</span></div>
+        <div class="cell" data-index="3"><span class="cell-emoji">🍉🍌</span><span class="cell-name">水果套餐</span></div>
+        <div class="cell" data-index="4"><span class="cell-emoji">🍢</span><span class="cell-name">BBQ</span></div>
+        <div class="cell" data-index="5"><span class="cell-emoji">🍔</span><span class="cell-name">塔斯汀</span></div>
+        <div class="cell" data-index="6"><span class="cell-emoji">🍳</span><span class="cell-name">小炒</span></div>
+        <div class="cell" data-index="7"><span class="cell-emoji">🐟</span><span class="cell-name">烤鱼</span></div>
+        <div class="cell" data-index="8"><span class="cell-emoji">🐸🍲</span><span class="cell-name">蛙火锅</span></div>
+      </div>
+
+      <!-- 抽奖按钮与结果 -->
+      <button id="draw-btn" class="btn btn-primary btn-draw">🎯 开始抽奖</button>
+      <div id="result" class="result" style="display:none;"></div>
+
+      <!-- 抽奖记录 -->
+      <section class="history">
+        <h3>📜 我的抽奖记录</h3>
+        <ul id="history-list" class="history-list">
+          <li class="history-empty">还没有记录，快去抽一个吧～</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

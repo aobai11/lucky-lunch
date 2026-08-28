@@ -1,0 +1,258 @@
+/* ============ 全局 ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #ff6b35;
+  --primary-dark: #e8551f;
+  --primary-light: #ffd9c7;
+  --bg-grad-1: #1f2430;
+  --bg-grad-2: #2d3350;
+  --card-bg: #ffffff;
+  --text-main: #2b2f38;
+  --text-sub: #8a8f9a;
+  --cell-active: #ffb020;
+  --danger: #e5484d;
+  --ok: #30a46c;
+}
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", system-ui, sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+  color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.view { width: 100%; display: flex; justify-content: center; }
+
+/* ============ 登录/注册卡片 ============ */
+.auth-card {
+  background: var(--card-bg);
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 36px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  text-align: center;
+  animation: pop-in .35s ease;
+}
+
+.auth-logo { font-size: 52px; margin-bottom: 8px; }
+#auth-title { font-size: 26px; margin-bottom: 4px; }
+.auth-subtitle { color: var(--text-sub); font-size: 14px; margin-bottom: 26px; }
+
+.field { display: block; text-align: left; margin-bottom: 16px; }
+.field span { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 6px; }
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  border: 1.5px solid #e2e4ea;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.field input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255,107,53,0.15);
+}
+
+.auth-error {
+  background: #fdecec;
+  color: var(--danger);
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+/* ============ 按钮 ============ */
+.btn {
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: inherit;
+  border-radius: 12px;
+  transition: transform .15s, box-shadow .2s, background .2s;
+}
+.btn:active { transform: translateY(2px); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(255,107,53,0.35);
+}
+.btn-primary:hover { box-shadow: 0 10px 24px rgba(255,107,53,0.45); }
+.btn-primary:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; }
+
+.btn-block { width: 100%; padding: 13px 0; margin-top: 6px; }
+.btn-ghost {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  padding: 8px 16px;
+  font-size: 14px;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.12); }
+
+.auth-switch { margin-top: 20px; font-size: 14px; color: var(--text-sub); }
+.auth-switch a { color: var(--primary); font-weight: 600; text-decoration: none; }
+.auth-switch a:hover { text-decoration: underline; }
+
+/* ============ 抽奖主界面 ============ */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  z-index: 10;
+}
+.topbar-user { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.avatar {
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+}
+
+.container {
+  width: 100%;
+  max-width: 560px;
+  margin: 90px auto 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.page-title { color: #fff; font-size: 30px; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.page-subtitle { color: rgba(255,255,255,0.75); margin: 6px 0 26px; font-size: 15px; }
+
+/* ============ 九宫格转盘 ============ */
+.wheel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 480px;
+  padding: 16px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 22px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+
+.cell {
+  aspect-ratio: 1 / 1;
+  background: var(--card-bg);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .2s, background .25s;
+  user-select: none;
+}
+.cell:hover { transform: scale(1.03); }
+.cell-emoji { font-size: 30px; line-height: 1; }
+.cell-name { font-size: 14px; font-weight: 600; color: var(--text-main); }
+
+/* 扫动高亮 */
+.cell.running {
+  background: linear-gradient(135deg, var(--cell-active), #ffd76a);
+  transform: scale(1.06);
+  box-shadow: 0 0 22px rgba(255,176,32,0.75);
+}
+.cell.running .cell-name { color: #7a4a00; }
+
+/* 中奖定格 */
+.cell.winner {
+  background: linear-gradient(135deg, #ffe259, #ffa751);
+  box-shadow: 0 0 32px rgba(255,182,25,0.9);
+  animation: winner-pulse .8s ease 3;
+}
+.cell.winner .cell-name { color: #7a4a00; font-weight: 700; }
+
+/* ============ 抽奖按钮 & 结果 ============ */
+.btn-draw {
+  margin-top: 28px;
+  padding: 15px 54px;
+  font-size: 19px;
+  letter-spacing: 2px;
+}
+
+.result {
+  margin-top: 18px;
+  padding: 16px 28px;
+  background: var(--card-bg);
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  animation: pop-in .4s ease;
+  text-align: center;
+}
+
+/* ============ 抽奖记录 ============ */
+.history {
+  width: 100%;
+  max-width: 480px;
+  margin-top: 32px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 18px 20px;
+  color: #fff;
+}
+.history h3 { font-size: 16px; margin-bottom: 12px; }
+.history-list { list-style: none; max-height: 200px; overflow-y: auto; }
+.history-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 4px;
+  font-size: 14px;
+  border-bottom: 1px dashed rgba(255,255,255,0.18);
+}
+.history-list li:last-child { border-bottom: none; }
+.history-empty { color: rgba(255,255,255,0.5); }
+
+/* ============ 动画 ============ */
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(14px) scale(.96); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes winner-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.1); }
+}
+
+/* 简单彩带飘落 */
+.confetti {
+  position: fixed;
+  top: -20px;
+  width: 10px; height: 16px;
+  border-radius: 2px;
+  opacity: .9;
+  animation: fall linear forwards;
+  z-index: 999;
+  pointer-events: none;
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(720deg); }
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 520px) {
+  .wheel { gap: 8px; padding: 10px; }
+  .cell-emoji { font-size: 24px; }
+  .cell-name { font-size: 12px; }
+  .page-title { font-size: 24px; }
+}
