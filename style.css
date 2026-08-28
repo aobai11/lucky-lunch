@@ -249,10 +249,114 @@ body {
   to { transform: translateY(110vh) rotate(720deg); }
 }
 
+/* ============ 游戏切换标签 ============ */
+.game-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(255,255,255,0.12);
+  padding: 6px;
+  border-radius: 999px;
+  margin-bottom: 26px;
+}
+.game-tab {
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.8);
+  font-size: 15px;
+  font-family: inherit;
+  padding: 9px 24px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.game-tab:hover { color: #fff; }
+.game-tab.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(255,107,53,0.4);
+}
+
+/* ============ 刮刮乐 ============ */
+.scratch-card {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 400px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+  background: linear-gradient(160deg, #fff8e1, #ffecb3);
+  touch-action: none; /* 防止触摸时页面跟着滚动 */
+  cursor: pointer;
+}
+.scratch-prize {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.scratch-prize .amount {
+  font-size: 66px;
+  font-weight: 800;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #f6a72b, #d4880f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.scratch-prize .unit { font-size: 18px; font-weight: 600; color: #a97b1f; }
+.scratch-prize .label { font-size: 14px; color: #b08d4a; }
+#scratch-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+}
+.scratch-tip { color: rgba(255,255,255,0.7); margin-top: 14px; font-size: 14px; }
+
+/* ============ 支付门 ============ */
+.pay-gate {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  justify-content: center;
+}
+.pay-card {
+  background: var(--card-bg);
+  border-radius: 18px;
+  padding: 26px 20px 22px;
+  text-align: center;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+  width: 100%;
+  animation: pop-in .35s ease;
+}
+.pay-title { font-size: 18px; color: var(--text-main); margin-bottom: 18px; }
+.pay-card img {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  object-fit: contain;
+  background: #fff;
+}
+.pay-tip {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin: 14px 0 16px;
+  line-height: 1.7;
+}
+
 /* ============ 响应式 ============ */
 @media (max-width: 520px) {
   .wheel { gap: 8px; padding: 10px; }
   .cell-emoji { font-size: 24px; }
   .cell-name { font-size: 12px; }
   .page-title { font-size: 24px; }
+  .game-tab { font-size: 14px; padding: 8px 16px; }
+  .scratch-card { height: 360px; }
 }

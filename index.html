@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>午餐抽奖转盘 🍜</title>
+  <title>幸运抽奖 🎡🎟️</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,9 +11,9 @@
   <!-- ================= 登录 / 注册界面 ================= -->
   <div id="auth-view" class="view">
     <div class="auth-card">
-      <h1 class="auth-logo">🍜</h1>
+      <h1 class="auth-logo">🍀</h1>
       <h2 id="auth-title">欢迎回来</h2>
-      <p id="auth-subtitle" class="auth-subtitle">登录后开启你的午餐抽奖之旅</p>
+      <p id="auth-subtitle" class="auth-subtitle">登录后开启你的幸运之旅</p>
 
       <form id="auth-form" autocomplete="off">
         <label class="field">
@@ -43,8 +43,8 @@
     </div>
   </div>
 
-  <!-- ================= 抽奖主界面 ================= -->
-  <div id="lottery-view" class="view" style="display:none;">
+  <!-- ================= 游戏主界面（登录后） ================= -->
+  <div id="game-view" class="view" style="display:none;">
     <header class="topbar">
       <div class="topbar-user">
         <span class="avatar">👤</span>
@@ -54,32 +54,69 @@
     </header>
 
     <main class="container">
-      <h1 class="page-title">🎡 午餐抽奖转盘</h1>
-      <p class="page-subtitle">今天吃什么，交给命运吧！</p>
+      <!-- 游戏切换 -->
+      <nav class="game-tabs">
+        <button class="game-tab active" data-tab="lottery">🎡 午餐转盘</button>
+        <button class="game-tab" data-tab="scratch">🎟️ 刮刮乐</button>
+      </nav>
 
-      <!-- 九宫格转盘 -->
-      <div id="wheel" class="wheel">
-        <div class="cell" data-index="0"><span class="cell-emoji">🌶️🍗</span><span class="cell-name">辣子鸡套餐</span></div>
-        <div class="cell" data-index="1"><span class="cell-emoji">🥔🍚</span><span class="cell-name">土豆肉片盖饭</span></div>
-        <div class="cell" data-index="2"><span class="cell-emoji">🥟</span><span class="cell-name">抄手</span></div>
-        <div class="cell" data-index="3"><span class="cell-emoji">🍉🍌</span><span class="cell-name">水果套餐</span></div>
-        <div class="cell" data-index="4"><span class="cell-emoji">🍢</span><span class="cell-name">BBQ</span></div>
-        <div class="cell" data-index="5"><span class="cell-emoji">🍔</span><span class="cell-name">塔斯汀</span></div>
-        <div class="cell" data-index="6"><span class="cell-emoji">🍳</span><span class="cell-name">小炒</span></div>
-        <div class="cell" data-index="7"><span class="cell-emoji">🐟</span><span class="cell-name">烤鱼</span></div>
-        <div class="cell" data-index="8"><span class="cell-emoji">🐸🍲</span><span class="cell-name">蛙火锅</span></div>
-      </div>
+      <!-- ========== 游戏一：九宫格转盘 ========== -->
+      <section id="panel-lottery">
+        <h1 class="page-title">🎡 午餐抽奖转盘</h1>
+        <p class="page-subtitle">今天吃什么，交给命运吧！</p>
 
-      <!-- 抽奖按钮与结果 -->
-      <button id="draw-btn" class="btn btn-primary btn-draw">🎯 开始抽奖</button>
-      <div id="result" class="result" style="display:none;"></div>
+        <!-- 九宫格转盘 -->
+        <div id="wheel" class="wheel">
+          <div class="cell" data-index="0"><span class="cell-emoji">🌶️🍗</span><span class="cell-name">辣子鸡套餐</span></div>
+          <div class="cell" data-index="1"><span class="cell-emoji">🥔🍚</span><span class="cell-name">土豆肉片盖饭</span></div>
+          <div class="cell" data-index="2"><span class="cell-emoji">🥟</span><span class="cell-name">抄手</span></div>
+          <div class="cell" data-index="3"><span class="cell-emoji">🍉🍌</span><span class="cell-name">水果套餐</span></div>
+          <div class="cell" data-index="4"><span class="cell-emoji">🍢</span><span class="cell-name">BBQ</span></div>
+          <div class="cell" data-index="5"><span class="cell-emoji">🍔</span><span class="cell-name">塔斯汀</span></div>
+          <div class="cell" data-index="6"><span class="cell-emoji">🍳</span><span class="cell-name">小炒</span></div>
+          <div class="cell" data-index="7"><span class="cell-emoji">🐟</span><span class="cell-name">烤鱼</span></div>
+          <div class="cell" data-index="8"><span class="cell-emoji">🐸🍲</span><span class="cell-name">蛙火锅</span></div>
+        </div>
 
-      <!-- 抽奖记录 -->
-      <section class="history">
-        <h3>📜 我的抽奖记录</h3>
-        <ul id="history-list" class="history-list">
-          <li class="history-empty">还没有记录，快去抽一个吧～</li>
-        </ul>
+        <!-- 抽奖按钮与结果 -->
+        <button id="draw-btn" class="btn btn-primary btn-draw">🎯 开始抽奖</button>
+        <div id="result" class="result" style="display:none;"></div>
+
+        <!-- 抽奖记录 -->
+        <section class="history">
+          <h3>📜 我的抽奖记录</h3>
+          <ul id="history-list" class="history-list">
+            <li class="history-empty">还没有记录，快去抽一个吧～</li>
+          </ul>
+        </section>
+      </section>
+
+      <!-- ========== 游戏二：刮刮乐 ========== -->
+      <section id="panel-scratch" style="display:none;">
+        <h1 class="page-title">🎟️ 刮刮乐</h1>
+        <p class="page-subtitle">2 元一刮，刮开涂层看看手气！</p>
+
+        <!-- 支付门：未付款时显示 -->
+        <div id="pay-gate" class="pay-gate">
+          <div class="pay-card">
+            <h3 class="pay-title">💰 刮刮乐 · 2 元 / 次</h3>
+            <img id="pay-qr" src="pay-qr.jpg" alt="收款二维码">
+            <p class="pay-tip">扫码支付 <strong>2 元</strong><br>支付完成后点击下方按钮开始刮卡</p>
+            <button id="pay-confirm" class="btn btn-primary btn-block">✅ 我已付款，开始刮卡</button>
+          </div>
+        </div>
+
+        <!-- 刮卡区：付款后显示 -->
+        <div id="scratch-play" style="display:none;">
+          <div class="scratch-card">
+            <div class="scratch-prize" id="scratch-prize">💰</div>
+            <canvas id="scratch-canvas" width="600" height="760"></canvas>
+          </div>
+
+          <p class="scratch-tip">💡 用鼠标 / 手指来回刮，刮开超一半就自动揭晓</p>
+          <div id="scratch-result" class="result" style="display:none;"></div>
+          <button id="scratch-new" class="btn btn-primary btn-draw">🔄 再来一张（¥2）</button>
+        </div>
       </section>
     </main>
   </div>

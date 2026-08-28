@@ -46,7 +46,10 @@ function hashPassword(pw) {
 
 // ---------- 元素引用 ----------
 const authView     = document.getElementById('auth-view');
-const lotteryView  = document.getElementById('lottery-view');
+const gameView     = document.getElementById('game-view');
+const panelLottery = document.getElementById('panel-lottery');
+const panelScratch = document.getElementById('panel-scratch');
+const gameTabs     = document.querySelectorAll('.game-tab');
 const authTitle    = document.getElementById('auth-title');
 const authSubtitle = document.getElementById('auth-subtitle');
 const authForm     = document.getElementById('auth-form');
@@ -129,7 +132,7 @@ authForm.addEventListener('submit', (e) => {
     };
     saveUsers(users);
     setSession(username);
-    enterLottery();
+    enterGame();
   } else {
     if (!users[username]) {
       return showError('该用户名不存在，请先注册');
@@ -138,20 +141,22 @@ authForm.addEventListener('submit', (e) => {
       return showError('密码错误，请重试');
     }
     setSession(username);
-    enterLottery();
+    enterGame();
   }
 });
 
 // ---------- 进入 / 退出 ----------
-function enterLottery() {
+function enterGame() {
   const user = getSession();
   currentUserEl.textContent = user;
   authView.style.display    = 'none';
-  lotteryView.style.display = 'flex';
+  gameView.style.display    = 'flex';
   authForm.reset();
   hideError();
+  switchGame('lottery');
   resetWheel();
   renderHistory();
+  initScratch();
 }
 
 logoutBtn.addEventListener('click', () => {
@@ -159,9 +164,18 @@ logoutBtn.addEventListener('click', () => {
   mode = 'login';
   renderAuthMode();
   authForm.reset();
-  lotteryView.style.display = 'none';
-  authView.style.display    = 'flex';
+  gameView.style.display = 'none';
+  authView.style.display = 'flex';
 });
+
+// ---------- 游戏切换 ----------
+function switchGame(name) {
+  gameTabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  panelLottery.style.display = name === 'lottery' ? '' : 'none';
+  panelScratch.style.display = name === 'scratch' ? '' : 'none';
+}
+
+gameTabs.forEach(t => t.addEventListener('click', () => switchGame(t.dataset.tab)));
 
 function resetWheel() {
   cells.forEach(c => c.classList.remove('running', 'winner'));
@@ -274,9 +288,182 @@ function confetti() {
   }
 }
 
+// ---------- 刮刮乐 ----------
+const scratchCanvas  = document.getElementById('scratch-canvas');
+const scratchPrizeEl = document.getElementById('scratch-prize');
+const scratchNewBtn  = document.getElementById('scratch-new');
+const scratchResult  = document.getElementById('scratch-result');
+const scratchCtx     = scratchCanvas.getContext('2d');
+const payGate        = document.getElementById('pay-gate');
+const scratchPlay    = document.getElementById('scratch-play');
+const payConfirmBtn  = document.getElementById('pay-confirm');
+
+let prizeAmount    = 0;      // 当前卡片的中奖金额
+let scratchRevealed = false; // 是否已揭晓
+let scratchActive  = false;  // 是否正在刮
+let scratchLast    = null;   // 上一次刮的位置（连成线条）
+let scratchInited  = false;
+let scratchCheckTick = 0;
+
+function initScratch() {
+  if (scratchInited) return;
+  scratchInited = true;
+  bindScratchEvents();
+  lockScratch(); // 初始状态：先付款再刮
+}
+
+// 锁定：显示支付门，隐藏刮卡区
+function lockScratch() {
+  scratchRevealed = true; // 防止未付款还能刮
+  scratchResult.style.display = 'none';
+  payGate.style.display = '';
+  scratchPlay.style.display = 'none';
+}
+
+// 付款确认后解锁：隐藏支付门，发新卡
+function unlockScratch() {
+  payGate.style.display = 'none';
+  scratchPlay.style.display = '';
+  newScratchCard();
+}
+
+// 按概率抽取金额：100->1%, 50->2%, 10->10%, 5->20%, 2->30%, 1->37%
+function pickPrize() {
+  const r = Math.random() * 100;
+  if (r < 1)  return 100;
+  if (r < 3)  return 50;
+  if (r < 13) return 10;
+  if (r < 33) return 5;
+  if (r < 63) return 2;
+  return 1;
+}
+
+function newScratchCard() {
+  prizeAmount     = pickPrize();
+  scratchRevealed = false;
+  scratchActive   = false;
+  scratchLast     = null;
+  scratchCheckTick = 0;
+  scratchResult.style.display = 'none';
+  scratchPrizeEl.innerHTML =
+    `<span class="amount">¥${prizeAmount}</span>` +
+    `<span class="unit">元</span>` +
+    `<span class="label">幸运金额</span>`;
+  drawScratchCover();
+}
+
+function drawScratchCover() {
+  const ctx = scratchCtx;
+  const w = scratchCanvas.width, h = scratchCanvas.height;
+  ctx.globalCompositeOperation = 'source-over';
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, '#b9c0cb');
+  grad.addColorStop(0.5, '#e4e8ee');
+  grad.addColorStop(1, '#a7aeba');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  // 中心提示
+  ctx.fillStyle = 'rgba(90,98,112,0.85)';
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 46px "Microsoft YaHei", sans-serif';
+  ctx.fillText('🎟️', w / 2, h / 2 - 36);
+  ctx.fillText('刮 一 刮', w / 2, h / 2 + 30);
+  ctx.font = '24px "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = 'rgba(90,98,112,0.5)';
+  ctx.fillText('试试你的手气', w / 2, h / 2 + 78);
+}
+
+function bindScratchEvents() {
+  scratchCanvas.addEventListener('mousedown', (e) => {
+    scratchActive = true;
+    scratchLast = getScratchPos(e);
+  });
+  scratchCanvas.addEventListener('mousemove', (e) => {
+    if (scratchActive) scratchAt(e);
+  });
+  window.addEventListener('mouseup', () => {
+    scratchActive = false;
+    scratchLast = null;
+  });
+
+  scratchCanvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    scratchActive = true;
+    scratchLast = getScratchPos(e);
+  }, { passive: false });
+  scratchCanvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (scratchActive) scratchAt(e);
+  }, { passive: false });
+  scratchCanvas.addEventListener('touchend', () => {
+    scratchActive = false;
+    scratchLast = null;
+  });
+
+  // 再来一张：先回到支付门
+  scratchNewBtn.addEventListener('click', lockScratch);
+  // 确认已付款：解锁发新卡
+  payConfirmBtn.addEventListener('click', unlockScratch);
+}
+
+// 把鼠标/触摸位置换算成 canvas 内部坐标
+function getScratchPos(e) {
+  const rect = scratchCanvas.getBoundingClientRect();
+  const p = e.touches ? e.touches[0] : e;
+  return {
+    x: (p.clientX - rect.left) * (scratchCanvas.width / rect.width),
+    y: (p.clientY - rect.top) * (scratchCanvas.height / rect.height)
+  };
+}
+
+function scratchAt(e) {
+  if (scratchRevealed) return;
+  const pos = getScratchPos(e);
+  const ctx = scratchCtx;
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.lineWidth = 56;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(scratchLast.x, scratchLast.y);
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+  scratchLast = pos;
+
+  // 每刮 6 次检测一次刮开比例（避免每帧都查像素太卡）
+  if (++scratchCheckTick % 6 === 0) {
+    checkScratchProgress();
+  }
+}
+
+// 采样统计透明像素比例，超过 55% 自动揭晓
+function checkScratchProgress() {
+  if (scratchRevealed) return;
+  const data = scratchCtx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height).data;
+  let transparent = 0, total = 0;
+  for (let i = 3; i < data.length; i += 4 * 20) {
+    total++;
+    if (data[i] === 0) transparent++;
+  }
+  if (transparent / total > 0.55) {
+    revealScratch();
+  }
+}
+
+function revealScratch() {
+  if (scratchRevealed) return;
+  scratchRevealed = true;
+  scratchCtx.globalCompositeOperation = 'destination-out';
+  scratchCtx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+  scratchResult.style.display = 'block';
+  scratchResult.innerHTML = `🎉 恭喜刮到 <strong>¥${prizeAmount}</strong> 元！`;
+  confetti();
+}
+
 // ---------- 初始化 ----------
 if (getSession()) {
-  enterLottery(); // 已登录直接进入抽奖页
+  enterGame(); // 已登录直接进入抽奖页
 } else {
   renderAuthMode();
 }
