@@ -347,9 +347,36 @@ body {
 .pay-tip {
   font-size: 13px;
   color: var(--text-sub);
-  margin: 14px 0 16px;
+  margin: 14px 0 12px;
   line-height: 1.7;
 }
+.pay-hint {
+  font-size: 12px;
+  color: var(--text-sub);
+  background: #f7f8fa;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  line-height: 1.8;
+  text-align: left;
+}
+.pay-hint b { color: var(--text-main); }
+.btn-save {
+  display: block;
+  width: 100%;
+  padding: 11px 0;
+  font-size: 14px;
+  color: var(--primary);
+  background: var(--primary-light);
+  text-decoration: none;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-family: inherit;
+  cursor: pointer;
+  transition: filter .2s;
+}
+.btn-save:hover { filter: brightness(0.96); }
 
 /* ============ 响应式 ============ */
 @media (max-width: 520px) {
