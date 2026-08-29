@@ -297,6 +297,10 @@ const scratchCtx     = scratchCanvas.getContext('2d');
 const payGate        = document.getElementById('pay-gate');
 const scratchPlay    = document.getElementById('scratch-play');
 const payConfirmBtn  = document.getElementById('pay-confirm');
+const approvalBox    = document.getElementById('approval-box');
+const approvalCode   = document.getElementById('approval-code');
+const approvalSubmit = document.getElementById('approval-submit');
+const approvalError  = document.getElementById('approval-error');
 
 let prizeAmount    = 0;      // 当前卡片的中奖金额
 let scratchRevealed = false; // 是否已揭晓
@@ -312,17 +316,25 @@ function initScratch() {
   lockScratch(); // 初始状态：先付款再刮
 }
 
+// ⚠️ 放行口令：老板想换口令就改这里，改完重新推送部署即可生效
+const APPROVAL_CODE = '8888';
+// PushPlus 微信推送 Token（在 pushplus.plus 注册后获取，填写后玩家付款会推送通知到你微信）
+const PUSHPLUS_TOKEN = '9de5db4793a94258a507e615ef407e41';
+
 // 锁定：显示支付门，隐藏刮卡区
 function lockScratch() {
   scratchRevealed = true; // 防止未付款还能刮
   scratchResult.style.display = 'none';
   payGate.style.display = '';
   scratchPlay.style.display = 'none';
-  // 重置付款按钮状态
+  // 重置付款确认区域状态
   if (payTimer) { clearInterval(payTimer); payTimer = null; }
-  payConfirmed = false;
   payConfirmBtn.disabled = false;
+  payConfirmBtn.style.display = '';
   payConfirmBtn.textContent = '✅ 我已付款，开始刮卡';
+  approvalBox.style.display = 'none';
+  approvalError.style.display = 'none';
+  approvalCode.value = '';
 }
 
 // 付款确认后解锁：隐藏支付门，发新卡
@@ -334,16 +346,9 @@ function unlockScratch() {
 
 // 付款确认倒计时：点击"我已付款"后必须等待确认期，防止随手跳过
 let payTimer = null;
-let payConfirmed = false; // 是否已完成付款确认
 const PAY_CONFIRM_SECONDS = 10;
 
 function startPayConfirm() {
-  // 已完成确认：直接解锁刮卡
-  if (payConfirmed) {
-    payConfirmed = false;
-    unlockScratch();
-    return;
-  }
   if (payTimer) return; // 倒计时进行中，忽略重复点击
 
   payConfirmBtn.disabled = true;
@@ -354,13 +359,43 @@ function startPayConfirm() {
     if (left <= 0) {
       clearInterval(payTimer);
       payTimer = null;
-      payConfirmed = true;
-      payConfirmBtn.disabled = false;
-      payConfirmBtn.textContent = '✅ 确认已付款，开始刮卡';
+      // 倒计时结束：通知老板核对收款，等待放行口令
+      payConfirmBtn.style.display = 'none';
+      approvalBox.style.display = '';
+      approvalError.style.display = 'none';
+      approvalCode.value = '';
+      approvalCode.focus();
+      sendNotify();
     } else {
       payConfirmBtn.textContent = `⏳ 请打开微信/支付宝核对扣款… ${left}s`;
     }
   }, 1000);
+}
+
+// 通过 PushPlus 推送微信通知给老板（图片请求方式，无跨域限制）
+function sendNotify() {
+  if (!PUSHPLUS_TOKEN) return; // 未配置 Token 时跳过通知
+  const user = getSession() || '未知用户';
+  const title = '🔔 刮刮乐付款确认请求';
+  const content = `玩家【${user}】已点击"我已付款"，请核对 2 元收款后，把放行口令发给对方。`;
+  const url = 'https://www.pushplus.plus/send?token=' + PUSHPLUS_TOKEN +
+    '&title=' + encodeURIComponent(title) +
+    '&content=' + encodeURIComponent(content) +
+    '&template=html';
+  new Image().src = url;
+}
+
+// 校验放行口令
+function checkApproval() {
+  if (approvalCode.value.trim() === APPROVAL_CODE) {
+    approvalError.style.display = 'none';
+    unlockScratch();
+  } else {
+    approvalError.style.display = 'block';
+    approvalCode.classList.add('shake');
+    setTimeout(() => approvalCode.classList.remove('shake'), 600);
+    approvalCode.select();
+  }
 }
 
 // 按概率抽取金额：100->0.2%, 50->0.5%, 20->1.5%, 5->8%, 2->15%, 其余 0.5元->74.8%（期望支出约1.82元，票价2元，微利）
@@ -439,8 +474,11 @@ function bindScratchEvents() {
 
   // 再来一张：先回到支付门
   scratchNewBtn.addEventListener('click', lockScratch);
-  // 确认已付款：进入付款确认倒计时，结束后解锁发新卡
+  // 确认已付款：进入付款确认倒计时，结束后通知老板等待放行
   payConfirmBtn.addEventListener('click', startPayConfirm);
+  // 放行口令校验
+  approvalSubmit.addEventListener('click', checkApproval);
+  approvalCode.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkApproval(); });
 }
 
 // 把鼠标/触摸位置换算成 canvas 内部坐标

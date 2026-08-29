@@ -378,6 +378,42 @@ body {
 }
 .btn-save:hover { filter: brightness(0.96); }
 
+/* ============ 放行口令 ============ */
+.approval-hint {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin: 12px 0 10px;
+  line-height: 1.7;
+  text-align: left;
+}
+.approval-hint b { color: var(--primary); }
+.approval-row { display: flex; gap: 8px; }
+#approval-code {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  font-size: 15px;
+  border: 1.5px solid #e2e4ea;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+#approval-code:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255,107,53,0.15);
+}
+#approval-submit {
+  padding: 11px 20px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+.shake { animation: shake .3s ease 2; border-color: var(--danger) !important; }
+
 /* ============ 响应式 ============ */
 @media (max-width: 520px) {
   .wheel { gap: 8px; padding: 10px; }
