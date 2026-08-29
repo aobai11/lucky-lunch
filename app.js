@@ -327,14 +327,14 @@ function unlockScratch() {
   newScratchCard();
 }
 
-// 按概率抽取金额：100->0.5%, 50->1%, 20->3%, 5->10%, 2->15%, 其余 0.5元->70.5%
+// 按概率抽取金额：100->0.2%, 50->0.5%, 20->1.5%, 5->8%, 2->15%, 其余 0.5元->74.8%（期望支出约1.82元，票价2元，微利）
 function pickPrize() {
   const r = Math.random() * 100;
-  if (r < 0.5)  return 100;
-  if (r < 1.5)  return 50;
-  if (r < 4.5)  return 20;
-  if (r < 14.5) return 5;
-  if (r < 29.5) return 2;
+  if (r < 0.2)  return 100;
+  if (r < 0.7)  return 50;
+  if (r < 2.2)  return 20;
+  if (r < 10.2) return 5;
+  if (r < 25.2) return 2;
   return 0.5;
 }
 
