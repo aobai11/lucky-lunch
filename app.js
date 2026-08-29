@@ -301,6 +301,7 @@ const approvalBox    = document.getElementById('approval-box');
 const approvalCode   = document.getElementById('approval-code');
 const approvalSubmit = document.getElementById('approval-submit');
 const approvalError  = document.getElementById('approval-error');
+const notifyAgainBtn = document.getElementById('notify-again');
 
 let prizeAmount    = 0;      // 当前卡片的中奖金额
 let scratchRevealed = false; // 是否已揭晓
@@ -316,10 +317,10 @@ function initScratch() {
   lockScratch(); // 初始状态：先付款再刮
 }
 
-// ⚠️ 放行口令：老板想换口令就改这里，改完重新推送部署即可生效
-const APPROVAL_CODE = '8888';
 // PushPlus 微信推送 Token（在 pushplus.plus 注册后获取，填写后玩家付款会推送通知到你微信）
 const PUSHPLUS_TOKEN = '9de5db4793a94258a507e615ef407e41';
+// 本次付款的一次性放行口令：每次付款随机生成，用完即失效，不能重复使用
+let currentCode = '';
 
 // 锁定：显示支付门，隐藏刮卡区
 function lockScratch() {
@@ -327,11 +328,11 @@ function lockScratch() {
   scratchResult.style.display = 'none';
   payGate.style.display = '';
   scratchPlay.style.display = 'none';
-  // 重置付款确认区域状态
-  if (payTimer) { clearInterval(payTimer); payTimer = null; }
+  // 重置付款状态：清空口令，恢复申请按钮
+  currentCode = '';
   payConfirmBtn.disabled = false;
   payConfirmBtn.style.display = '';
-  payConfirmBtn.textContent = '✅ 我已付款，开始刮卡';
+  payConfirmBtn.textContent = '✅ 我已付款，申请放行';
   approvalBox.style.display = 'none';
   approvalError.style.display = 'none';
   approvalCode.value = '';
@@ -344,40 +345,30 @@ function unlockScratch() {
   newScratchCard();
 }
 
-// 付款确认倒计时：点击"我已付款"后必须等待确认期，防止随手跳过
-let payTimer = null;
-const PAY_CONFIRM_SECONDS = 10;
+// 生成一次性放行口令：6 位随机数字，每次付款都不同
+function makeCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
 
+// 点击"我已付款"：立即生成新口令并推送到老板微信，等待放行
 function startPayConfirm() {
-  if (payTimer) return; // 倒计时进行中，忽略重复点击
+  if (currentCode) return; // 已申请等待放行中，忽略重复点击
 
-  payConfirmBtn.disabled = true;
-  let left = PAY_CONFIRM_SECONDS;
-  payConfirmBtn.textContent = `⏳ 请打开微信/支付宝核对扣款… ${left}s`;
-  payTimer = setInterval(() => {
-    left--;
-    if (left <= 0) {
-      clearInterval(payTimer);
-      payTimer = null;
-      // 倒计时结束：通知老板核对收款，等待放行口令
-      payConfirmBtn.style.display = 'none';
-      approvalBox.style.display = '';
-      approvalError.style.display = 'none';
-      approvalCode.value = '';
-      approvalCode.focus();
-      sendNotify();
-    } else {
-      payConfirmBtn.textContent = `⏳ 请打开微信/支付宝核对扣款… ${left}s`;
-    }
-  }, 1000);
+  currentCode = makeCode();
+  payConfirmBtn.style.display = 'none';
+  approvalBox.style.display = '';
+  approvalError.style.display = 'none';
+  approvalCode.value = '';
+  approvalCode.focus();
+  sendNotify(currentCode);
 }
 
 // 通过 PushPlus 推送微信通知给老板（图片请求方式，无跨域限制）
-function sendNotify() {
+function sendNotify(code) {
   if (!PUSHPLUS_TOKEN) return; // 未配置 Token 时跳过通知
   const user = getSession() || '未知用户';
   const title = '🔔 刮刮乐付款确认请求';
-  const content = `玩家【${user}】已点击"我已付款"，请核对 2 元收款后，把放行口令发给对方。`;
+  const content = `玩家【${user}】已点击"我已付款"，请核对 2 元收款。<br>本次放行口令：<b>${code}</b><br>核对到账后，把口令发给玩家即可放行（该口令仅本次有效）。`;
   const url = 'https://www.pushplus.plus/send?token=' + PUSHPLUS_TOKEN +
     '&title=' + encodeURIComponent(title) +
     '&content=' + encodeURIComponent(content) +
@@ -385,9 +376,9 @@ function sendNotify() {
   new Image().src = url;
 }
 
-// 校验放行口令
+// 校验放行口令（一次性：用完即作废，下次付款重新生成）
 function checkApproval() {
-  if (approvalCode.value.trim() === APPROVAL_CODE) {
+  if (approvalCode.value.trim() === currentCode) {
     approvalError.style.display = 'none';
     unlockScratch();
   } else {
@@ -479,6 +470,13 @@ function bindScratchEvents() {
   // 放行口令校验
   approvalSubmit.addEventListener('click', checkApproval);
   approvalCode.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkApproval(); });
+  // 老板没收到通知时，重新推送（口令不变，仍是同一次付款）
+  notifyAgainBtn.addEventListener('click', () => {
+    if (!currentCode) return;
+    notifyAgainBtn.textContent = '已重新通知，请稍等…';
+    sendNotify(currentCode);
+    setTimeout(() => { notifyAgainBtn.textContent = '🔁 老板没收到？重新通知'; }, 3000);
+  });
 }
 
 // 把鼠标/触摸位置换算成 canvas 内部坐标

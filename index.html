@@ -101,17 +101,18 @@
           <div class="pay-card">
             <h3 class="pay-title">💰 刮刮乐 · 2 元 / 次</h3>
             <img id="pay-qr" src="pay-qr.jpg" alt="收款二维码">
-            <p class="pay-tip">扫码支付 <strong>2 元</strong><br>支付完成后点击下方按钮，按提示确认扣款成功即可刮卡</p>
+            <p class="pay-tip">扫码支付 <strong>2 元</strong><br>付款后点击下方按钮，等老板核对到账后发放口令才能刮卡</p>
             <p class="pay-hint">💡 <b>微信 / 支付宝</b>里打开本页面时，<b>长按上方图片</b>即可自动识别二维码。<br>普通浏览器请先「保存图片」，再到微信「扫一扫 → 相册」识别</p>
             <a id="pay-save" class="btn btn-save" href="pay-qr.jpg" download="收款码.jpg">💾 保存收款码图片</a>
-            <button id="pay-confirm" class="btn btn-primary btn-block">✅ 我已付款，开始刮卡</button>
+            <button id="pay-confirm" class="btn btn-primary btn-block">✅ 我已付款，申请放行</button>
             <div id="approval-box" style="display:none;">
-              <p class="approval-hint">🔔 已通知老板核对收款，请向老板索取<b>放行口令</b>后输入：</p>
+              <p class="approval-hint">🔔 已通知老板核对收款，请向老板索取<b>本次口令</b>（每次付款口令都不同）后输入：</p>
               <div class="approval-row">
-                <input type="text" id="approval-code" placeholder="输入放行口令" maxlength="8" autocomplete="off">
+                <input type="text" id="approval-code" placeholder="输入放行口令" maxlength="6" autocomplete="off">
                 <button id="approval-submit" class="btn btn-primary">开 刮</button>
               </div>
-              <p id="approval-error" class="auth-error" style="display:none;">口令错误，请向老板核对后再试</p>
+              <p id="approval-error" class="auth-error" style="display:none;">口令错误或已失效，请向老板索取最新口令</p>
+              <button id="notify-again" class="btn btn-save">🔁 老板没收到通知？重新通知</button>
             </div>
           </div>
         </div>
