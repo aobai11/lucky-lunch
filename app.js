@@ -318,6 +318,10 @@ function lockScratch() {
   scratchResult.style.display = 'none';
   payGate.style.display = '';
   scratchPlay.style.display = 'none';
+  // 重置付款按钮状态
+  if (payTimer) { clearInterval(payTimer); payTimer = null; }
+  payConfirmBtn.disabled = false;
+  payConfirmBtn.textContent = '✅ 我已付款，开始刮卡';
 }
 
 // 付款确认后解锁：隐藏支付门，发新卡
@@ -325,6 +329,28 @@ function unlockScratch() {
   payGate.style.display = 'none';
   scratchPlay.style.display = '';
   newScratchCard();
+}
+
+// 付款确认倒计时：点击"我已付款"后必须等待确认期，防止随手跳过
+let payTimer = null;
+const PAY_CONFIRM_SECONDS = 10;
+
+function startPayConfirm() {
+  if (payTimer) return;
+  payConfirmBtn.disabled = true;
+  let left = PAY_CONFIRM_SECONDS;
+  payConfirmBtn.textContent = `⏳ 请打开微信/支付宝核对扣款… ${left}s`;
+  payTimer = setInterval(() => {
+    left--;
+    if (left <= 0) {
+      clearInterval(payTimer);
+      payTimer = null;
+      payConfirmBtn.disabled = false;
+      payConfirmBtn.textContent = '✅ 确认已付款，开始刮卡';
+    } else {
+      payConfirmBtn.textContent = `⏳ 请打开微信/支付宝核对扣款… ${left}s`;
+    }
+  }, 1000);
 }
 
 // 按概率抽取金额：100->0.2%, 50->0.5%, 20->1.5%, 5->8%, 2->15%, 其余 0.5元->74.8%（期望支出约1.82元，票价2元，微利）
@@ -403,8 +429,8 @@ function bindScratchEvents() {
 
   // 再来一张：先回到支付门
   scratchNewBtn.addEventListener('click', lockScratch);
-  // 确认已付款：解锁发新卡
-  payConfirmBtn.addEventListener('click', unlockScratch);
+  // 确认已付款：进入付款确认倒计时，结束后解锁发新卡
+  payConfirmBtn.addEventListener('click', startPayConfirm);
 }
 
 // 把鼠标/触摸位置换算成 canvas 内部坐标
