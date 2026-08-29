@@ -320,6 +320,7 @@ function lockScratch() {
   scratchPlay.style.display = 'none';
   // 重置付款按钮状态
   if (payTimer) { clearInterval(payTimer); payTimer = null; }
+  payConfirmed = false;
   payConfirmBtn.disabled = false;
   payConfirmBtn.textContent = '✅ 我已付款，开始刮卡';
 }
@@ -333,10 +334,18 @@ function unlockScratch() {
 
 // 付款确认倒计时：点击"我已付款"后必须等待确认期，防止随手跳过
 let payTimer = null;
+let payConfirmed = false; // 是否已完成付款确认
 const PAY_CONFIRM_SECONDS = 10;
 
 function startPayConfirm() {
-  if (payTimer) return;
+  // 已完成确认：直接解锁刮卡
+  if (payConfirmed) {
+    payConfirmed = false;
+    unlockScratch();
+    return;
+  }
+  if (payTimer) return; // 倒计时进行中，忽略重复点击
+
   payConfirmBtn.disabled = true;
   let left = PAY_CONFIRM_SECONDS;
   payConfirmBtn.textContent = `⏳ 请打开微信/支付宝核对扣款… ${left}s`;
@@ -345,6 +354,7 @@ function startPayConfirm() {
     if (left <= 0) {
       clearInterval(payTimer);
       payTimer = null;
+      payConfirmed = true;
       payConfirmBtn.disabled = false;
       payConfirmBtn.textContent = '✅ 确认已付款，开始刮卡';
     } else {
