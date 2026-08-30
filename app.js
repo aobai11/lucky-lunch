@@ -314,13 +314,32 @@ function initScratch() {
   if (scratchInited) return;
   scratchInited = true;
   bindScratchEvents();
-  lockScratch(); // 初始状态：先付款再刮
+  // 若已有未用完的口令（付款后切后台/刷新过页面），恢复"等待口令"状态，不用重新付款
+  const saved = JSON.parse(localStorage.getItem(CODE_KEY) || 'null');
+  if (saved && saved.code && saved.user === getSession()) {
+    currentCode = saved.code;
+    payConfirmBtn.style.display = 'none';
+    approvalBox.style.display = '';
+    approvalError.style.display = 'none';
+    approvalCode.value = '';
+  } else {
+    lockScratch();
+  }
 }
 
 // PushPlus 微信推送 Token（在 pushplus.plus 注册后获取，填写后玩家付款会推送通知到你微信）
 const PUSHPLUS_TOKEN = '9de5db4793a94258a507e615ef407e41';
 // 本次付款的一次性放行口令：每次付款随机生成，用完即失效，不能重复使用
 let currentCode = '';
+// 口令持久化存储：防止玩家付款后切到微信/支付宝、或刷新页面导致口令丢失
+const CODE_KEY = 'lucky_code';
+function saveCode() {
+  localStorage.setItem(CODE_KEY, JSON.stringify({ code: currentCode, user: getSession() }));
+}
+function clearCode() {
+  currentCode = '';
+  localStorage.removeItem(CODE_KEY);
+}
 
 // 锁定：显示支付门，隐藏刮卡区
 function lockScratch() {
@@ -329,7 +348,7 @@ function lockScratch() {
   payGate.style.display = '';
   scratchPlay.style.display = 'none';
   // 重置付款状态：清空口令，恢复申请按钮
-  currentCode = '';
+  clearCode();
   payConfirmBtn.disabled = false;
   payConfirmBtn.style.display = '';
   payConfirmBtn.textContent = '✅ 我已付款，申请放行';
@@ -340,6 +359,7 @@ function lockScratch() {
 
 // 付款确认后解锁：隐藏支付门，发新卡
 function unlockScratch() {
+  clearCode(); // 口令已使用，立即作废
   payGate.style.display = 'none';
   scratchPlay.style.display = '';
   newScratchCard();
@@ -355,6 +375,7 @@ function startPayConfirm() {
   if (currentCode) return; // 已申请等待放行中，忽略重复点击
 
   currentCode = makeCode();
+  saveCode(); // 持久化：刷新/切后台后口令也不会丢
   payConfirmBtn.style.display = 'none';
   approvalBox.style.display = '';
   approvalError.style.display = 'none';
